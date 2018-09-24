@@ -118,7 +118,26 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+	# Here we will be using the queue data structure from util.py which is First In First Out
+	bFS = util.Queue()
+	bFS.push((problem.getStartState(),[],[]))
+	visited = []
+	flag = 0
+	while (flag == 0):
+		if (bFS.isEmpty()): # checking if queue is empty
+			flag = 1
+			return None
+		e , actions , cost = bFS.pop() # dequeuing the earliest added element from the queue
+		if (e not in visited):
+			visited.append(e) # adding unvisited nodes to visited
+			if(problem.isGoalState(e)):
+				return actions
+			for node,directions,c in problem.getSuccessors(e):
+				bfs.push((node,actions+[directions],cost+[c])) # enqueue succesor node in the bFS queue
+	return []
+			
+	
+    #util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
