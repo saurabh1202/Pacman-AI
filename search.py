@@ -87,7 +87,33 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+	#Here we will be using the stack data structure from util.py
+	
+	dFS = util.Stack()
+	
+	#getting the problem states
+	current_state = [problem.getStartState(),[]]
+	visited = set() # Creating a visited set
+	flag = 0
+	
+	while(not problem.isGoalState(current[0])): # checking if the current state is goal state
+		(current_positions,directions) = current_state
+		successor = problem.getSuccessors(current_positions)		# getting succesor nodes by passing the current positions
+		for e in successor:
+			dFS.push((e[0],directions + e[1]) # pushing successors on stack
+		while(flag == 0):
+			if (dFS.isEmpty()):
+				flag=1
+				return None
+			e = dFS.pop()
+			if (e[0] not in visited):
+				break
+		current_state = e
+		visited.add(e[0]) #adding the visited nodes to set
+	return current_state[1]
+		
+	
+    #util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
