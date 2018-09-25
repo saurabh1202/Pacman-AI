@@ -295,14 +295,23 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, []) #returns the start state
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        element = state[0] #initializing node
+        TraversedCorners = state[1]  
+        count = 0
+        if element in self.corners:	
+            if element in TraversedCorners:
+		count = count + 1 #Getting the count of nodes in traversed
+	    else:
+                TraversedCorners.append(element) #Adding nodes in traversed
+            return len(TraversedCorners) == 4
+        return False
 
     def getSuccessors(self, state):
         """
@@ -314,6 +323,8 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
+	x,y = state[0]
+        visitedCorners = state[1]
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
@@ -325,6 +336,18 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+		
+	    dx, dy = Actions.directionToVector(action) #Getting the directions to vector
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]  #conditon if pacman hits the wall
+            if not hitsWall:
+                succTraversedCorners = list(visitedCorners)  #Adding the visited corner data
+                next_node = (nextx, nexty)
+                if next_node in self.corners: 
+                    if not next_node in succTraversedCorners:
+                        succTraversedCorners.append( next_node )
+                successor = ((next_node, succTraversedCorners), action, 1)
+                successors.append(successor)
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -360,7 +383,26 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    element = state[0] #Getting the current state
+    TraversedCorners = state[1] 
+
+    unTraversedCorners = []  #Creating array of unvisited nodes
+    sum = 0
+    count = 0
+    for corner in corners:
+        if corner in TraversedCorners:
+	    count = count + 1
+	else:
+            unTraversedCorners.append(corner)  #Adding the corners traversed
+
+    currentPosition = element
+    while len(unTraversedCorners) > 0:
+        distance, corner = min([(util.manhattanDistance(currentPosition, corner), corner) for corner in unTraversedCorners])
+        sum = sum + distance
+        currentPosition = corner
+        unTraversedCorners.remove(corner)
+
+    return sum
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -454,7 +496,44 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    if(problem.isGoalState(state)):
+        return 0
+    NodesINMST = set()
+    NodesNOTMST = set()
+    
+    for i, item in enumerate(foodGrid):
+        for j, foodItem in enumerate(item):
+            if(foodItem):
+                NodesNOTMST.add((i,j))
+    nearest_dist = min([util.manhattanDistance(position, item) for item in NodesNOTMST]) #calculating nearest distance
+    edges = util.PriorityQueue()   
+    cost = 0
+    poppedEdge = None
+    intoV, outofV = 0,0
+    TotalCost = nearest_dist
+    Edges = []
+    flag = 0
+    currentVert = NodesNOTMST.pop() #Getting the states
+    NodesINMST.add(currentVert)
+    
+    while len(NodesNOTMST) != 0:
+        for vert in NodesNOTMST:
+            cost = util.manhattanDistance(currentVert, vert)
+            edges.push(((currentVert, vert), cost), cost)  #push edges if not in MST
+	    flag = 0
+        while(flag == 0):  
+            poppedEdge, cost = edges.pop()
+            if(poppedEdge[1] in NodesNOTMST):
+                intoV, outofV = poppedEdge
+		flag = 1
+                break
+        TotalCost = TotalCost + cost
+        NodesNOTMST.remove(outofV)
+        NodesINMST.add(outofV)
+        Edges.append((poppedEdge, cost)) #Getting the edges in edge list
+        currentVert = outofV   
+    return TotalCost
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -485,7 +564,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+	return search.bfs(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -521,7 +600,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        foodList = self.food.asList()  #Creating foodlist
+
+        dist, eat = min([(util.manhattanDistance(state, eat), eat) for eat in foodList]) #Calculating the distance
+        isGoal = state == eat
+        return isGoal
 
 def mazeDistance(point1, point2, gameState):
     """

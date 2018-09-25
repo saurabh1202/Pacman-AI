@@ -87,62 +87,68 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-	#Here we will be using the stack data structure from util.py
-	
-	dFS = util.Stack()
-	
-	#getting the problem states
-	current_state = [problem.getStartState(),[]]
-	visited = set() # Creating a visited set
-	flag = 0
-	
-	while(not problem.isGoalState(current[0])): # checking if the current state is goal state
-		(current_positions,directions) = current_state
-		successor = problem.getSuccessors(current_positions)		# getting succesor nodes by passing the current positions
-		for e in successor:
-			dFS.push((e[0],directions + e[1]) # pushing successors on stack
-		while(flag == 0):
-			if (dFS.isEmpty()):
-				flag=1
-				return None
-			e = dFS.pop()
-			if (e[0] not in visited):
-				break
-		current_state = e
-		visited.add(e[0]) #adding the visited nodes to set
-	return current_state[1]
-		
-	
-    #util.raiseNotDefined()
+    dfsFringe = util.Stack()
+    current = [problem.getStartState(), []] #Getting problem states
+    expanded = set()   #making the visited set
+    flag = 0
+    while(not problem.isGoalState(current[0])):  #checking for the goal condition
+        (current_pos, directions) = current
+        successor = problem.getSuccessors(current_pos)  #Getting node successor
+        for element in successor:
+            dfsFringe.push((element[0], directions + [element[1]]))  #pushing the successor nodes on the stack
+        while (flag == 0):
+            if (dfsFringe.isEmpty()):
+		flag = 1
+                return None
+            element = dfsFringe.pop() 
+            if (element[0] not in expanded):
+                break    
+        current = element
+        expanded.add(element[0])  #Adding the visited nodes in the set
+    return current[1]    #Getting the final state
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-	# Here we will be using the queue data structure from util.py which is First In First Out
-	bFS = util.Queue()
-	bFS.push((problem.getStartState(),[],[]))
-	visited = []
-	flag = 0
-	while (flag == 0):
-		if (bFS.isEmpty()): # checking if queue is empty
-			flag = 1
-			return None
-		e , actions , cost = bFS.pop() # dequeuing the earliest added element from the queue
-		if (e not in visited):
-			visited.append(e) # adding unvisited nodes to visited
-			if(problem.isGoalState(e)):
-				return actions
-			for node,directions,c in problem.getSuccessors(e):
-				bfs.push((node,actions+[directions],cost+[c])) # enqueue succesor node in the bFS queue
-	return []
-			
-	
-    #util.raiseNotDefined()
+    bfsFringe = util.Queue()
+    bfsFringe.push((problem.getStartState(), [], []))
+    expanded = []
+    flag = 0
+
+    while(flag == 0):
+        if(bfsFringe.isEmpty()): #checking if fringe is empty
+            flag = 1
+            break
+        element, actions, CurrentCost = bfsFringe.pop() #Getting elements from fringe
+        if(not element in expanded):
+            expanded.append(element) #Adding nodes to the expanded
+            if problem.isGoalState(element):
+                return actions
+            for node, direction, cost in problem.getSuccessors(element):
+                bfsFringe.push((node, actions+[direction], CurrentCost + [cost])) #push successor on the fringe
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startnode=problem.getStartState()
+    ucsFringe=util.PriorityQueue() #creation of prioirty data queue
+    ucsFringe.push((startnode,[]),0)
+    expanded= set()
+    while(True):
+        node,action=ucsFringe.pop()
+        if problem.isGoalState(node): #checking for goal
+            break
+        if node not in expanded:
+            expanded.add(node) #Adding node in visited array
+            child=problem.getSuccessors(node) #getting the children of the successors
+            for c in child:
+                if c[0] not in (expanded or ucsFringe):
+                    d=action+[c[1]] #getting the path for getting the children from root
+                    cost=problem.getCostOfActions(d) #getting cost of action for getting to that child from root
+                    ucsFringe.push((c[0],d),cost) #Storing the state, path and cost
+    return action
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -154,7 +160,23 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startnode=problem.getStartState()
+    astarFringe=util.PriorityQueue()#priority queue data structure
+    astarFringe.push((startnode,[]),heuristic(startnode,problem))
+    expanded=[]
+    while(True):
+        node,action=astarFringe.pop()
+        if problem.isGoalState(node): #checking for goal 
+            break
+        if node not in expanded:
+            expanded.append(node) #exploring the node
+            child=problem.getSuccessors(node) #getting the children of the current node
+            for c in child:
+                if c[0] not in (expanded or astarFringe):
+                    d=action+[c[1]]#getting the path from root to child
+                    cost=problem.getCostOfActions(d)+heuristic(c[0],problem)#getting total cost as cost of action + heuristic cost
+                    astarFringe.push((c[0],d),cost) #saving state, path and total cost in the node
+    return action
 
 
 # Abbreviations
