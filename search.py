@@ -131,7 +131,23 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    
+    startnode=problem.getStartState()
+    ucsFringe=util.PriorityQueue() #creation of prioirty data queue
+    ucsFringe.push((startnode,[]),0)
+    expanded= set()
+    while(True):
+        node,action=ucsFringe.pop()
+        if problem.isGoalState(node): #checking for goal
+            break
+        if node not in expanded:
+            expanded.add(node) #Adding node in visited array
+            child=problem.getSuccessors(node) #getting the children of the successors
+            for c in child:
+                if c[0] not in (expanded or ucsFringe):
+                    d=action+[c[1]] #getting the path for getting the children from root
+                    cost=problem.getCostOfActions(d) #getting cost of action for getting to that child from root
+                    ucsFringe.push((c[0],d),cost) #Storing the state, path and cost
+    return action
 
 
 def nullHeuristic(state, problem=None):
@@ -143,6 +159,31 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
+	"*** YOUR CODE HERE ***"
+    startnode=problem.getStartState()
+    astarFringe=util.PriorityQueue()#priority queue data structure
+    astarFringe.push((startnode,[]),heuristic(startnode,problem))
+    expanded=[]
+    while(True):
+        node,action=astarFringe.pop()
+        if problem.isGoalState(node): #checking for goal 
+            break
+        if node not in expanded:
+            expanded.append(node) #exploring the node
+            child=problem.getSuccessors(node) #getting the children of the current node
+            for c in child:
+                if c[0] not in (expanded or astarFringe):
+                    d=action+[c[1]]#getting the path from root to child
+                    cost=problem.getCostOfActions(d)+heuristic(c[0],problem)#getting total cost as cost of action + heuristic cost
+                    astarFringe.push((c[0],d),cost) #saving state, path and total cost in the node
+    return action
+	
+	
+	
+	
+	
+	
+	
   
 
 
