@@ -501,7 +501,43 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    if(problem.isGoalState(state)): #check whether it is the goalstate
+        return 0
+    NodesINMST = set()
+    NodesNOTMST = set()
+    
+    for i, item in enumerate(foodGrid):
+        for j, foodItem in enumerate(item):
+            if(foodItem):
+                NodesNOTMST.add((i,j))
+    nearest_dist = min([util.manhattanDistance(position, item) for item in NodesNOTMST]) #calculating nearest distance
+    edges = util.PriorityQueue()   
+    cost = 0
+    poppedEdge = None
+    intoV, outofV = 0,0
+    TotalCost = nearest_dist
+    Edges = []
+    flag = 0
+    currentVert = NodesNOTMST.pop() #Getting the states
+    NodesINMST.add(currentVert)
+    
+    while len(NodesNOTMST) != 0:
+        for vert in NodesNOTMST:
+            cost = util.manhattanDistance(currentVert, vert)
+            edges.push(((currentVert, vert), cost), cost)  #push edges if not in MST
+	    flag = 0
+        while(flag == 0):  
+            poppedEdge, cost = edges.pop()
+            if(poppedEdge[1] in NodesNOTMST):
+                intoV, outofV = poppedEdge
+		flag = 1
+                break
+        TotalCost = TotalCost + cost
+        NodesNOTMST.remove(outofV)
+        NodesINMST.add(outofV)
+        Edges.append((poppedEdge, cost)) #Getting the edges in edge list
+        currentVert = outofV   
+    return TotalCost
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
